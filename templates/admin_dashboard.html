@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+    <div class="dashboard-page-wrapper">
+        <h1>Admin Dashboard</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flash-messages">
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <h2>Manage Users</h2>
+        <div class="user-table-controls">
+            <input type="text" id="userSearch" onkeyup="filterUserTable()" placeholder="Search users...">
+            <button class="btn-action-primary" onclick="window.location.reload();">Refresh Users</button>
+        </div>
+
+        <div class="table-responsive">
+            <table id="userTable">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Role</th>
+                        <th>Department</th> {# Added Department Column #}
+                        <th>Email</th>      {# Added Email Column #}
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.role | capitalize }}</td> {# Capitalize role for display #}
+                        <td>{{ user.department if user.department else 'N/A' }}</td> {# Display Department #}
+                        <td>{{ user.email if user.email else 'N/A' }}</td>      {# Display Email #}
+                        <td>
+                            {# Prevent deleting the currently logged-in user or the superadmin user #}
+                            {% if user.role != 'superadmin' and user.id != session.user_id %}
+                            <form action="{{ url_for('delete_user', user_id=user.id) }}" method="POST" style="display:inline;">
+                                <button type="submit" class="btn-delete" onclick="return confirm('Are you sure you want to delete user {{ user.username }}?');">Delete</button>
+                            </form>
+                            {% else %}
+                                <button disabled class="btn-delete">Delete</button> {# Apply btn-delete class for consistency even when disabled #}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <hr style="width: 100%; border: 0; border-top: 1px solid #eee; margin: 30px 0;">
+
+        <h2>Add New User</h2>
+        <form method="POST" action="{{ url_for('add_user') }}">
+            <div class="admin-form-group">
+                <label for="new_username">Username:</label>
+                <input type="text" id="new_username" name="new_username" required>
+            </div>
+            <div class="admin-form-group">
+                <label for="new_password">Password:</label>
+                <input type="password" id="new_password" name="new_password" required>
+            </div>
+            <div class="admin-form-group">
+                <label for="new_role">Role:</label>
+                <select id="new_role" name="new_role" onchange="toggleDepartmentField()"> {# Added onchange for JS #}
+                    <option value="sales">Sales</option>
+                    <option value="guard">Guard</option>
+                    <option value="admin">Admin</option>
+                    <option value="superadmin">Superadmin</option> {# New Role #}
+                    <option value="manager">Manager</option> {# New Role #}
+                    <option value="team_lead">Team Lead</option> {# New Role #}
+                    <option value="executive">Executive</option> {# New Role #}
+                </select>
+            </div>
+            <div class="admin-form-group" id="department_field_group" style="display: none;"> {# Hidden by default #}
+                <label for="new_department">Department (Required for Manager/Team Lead):</label>
+                <input type="text" id="new_department" name="new_department">
+            </div>
+            <div class="admin-form-group"> {# New: Email field for users #}
+                <label for="new_email">Email (for Notifications):</label>
+                <input type="email" id="new_email" name="new_email">
+            </div>
+            <input type="submit" value="Add User" class="btn-action-primary">
+        </form>
+
+        <hr style="width: 100%; border: 0; border-top: 1px solid #eee; margin: 30px 0;">
+
+        {# --- Manage Clients --- #}
+        <h2>Manage Clients</h2>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Mobile</th>
+                        <th>Email</th>
+                        <th>Scheduled</th>
+                        <th>Code</th>
+                        <th>Used?</th>
+                        <th>Verified At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for client in all_clients %}
+                        <tr>
+                            <td>{{ client.id }}</td>
+                            <td>{{ client.client_name }}</td>
+                            <td>{{ client.mobile_number }}</td>
+                            <td>{{ client.email }}</td>
+                            <td>{{ client.scheduled_date }} {{ client.scheduled_time }}</td>
+                            <td><strong>{{ client.unique_code }}</strong></td>
+                            <td>{{ 'Yes' if client.is_code_used else 'No' }}</td>
+                            <td>{{ client.verified_at if client.verified_at else 'N/A' }}</td>
+                            <td>
+                                <a href="{{ url_for('edit_client', client_id=client.id) }}" class="btn-action-primary" style="padding: 8px 12px; font-size: 0.9em; border-radius: 5px; text-decoration: none;">Edit</a>
+                                <form action="{{ url_for('delete_client', client_id=client.id) }}" method="POST" style="display:inline; margin-left: 5px;">
+                                    <button type="submit" class="btn-delete" onclick="return confirm('Are you sure you want to delete client {{ client.client_name }}?');">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="9">No client data available.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+    <script>
+        // JavaScript for user table filtering
+        function filterUserTable() {
+            var input, filter, table, tr, td, i, txtValue;
+            input = document.getElementById("userSearch");
+            filter = input.value.toUpperCase();
+            table = document.getElementById("userTable");
+            tr = table.getElementsByTagName("tr");
+            for (i = 1; i < tr.length; i++) { // Start from 1 to skip the header row
+                td = tr[i].getElementsByTagName("td")[0]; // Username column
+                if (td) {
+                    txtValue = td.textContent || td.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
+
+        // JavaScript to show/hide department field based on selected role
+        function toggleDepartmentField() {
+            var roleSelect = document.getElementById('new_role');
+            var departmentFieldGroup = document.getElementById('department_field_group');
+            if (roleSelect.value === 'manager' || roleSelect.value === 'team_lead') {
+                departmentFieldGroup.style.display = 'flex'; // Use flex to maintain column layout
+            } else {
+                departmentFieldGroup.style.display = 'none';
+                document.getElementById('new_department').value = ''; // Clear value if hidden
+            }
+        }
+
+        // Call on page load to set initial state
+        document.addEventListener('DOMContentLoaded', toggleDepartmentField);
+    </script>
+{% endblock %}

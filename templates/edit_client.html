@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Client{% endblock %}
+
+{% block head %}
+{{ super() }}
+<style>
+    /* Styling for the dashboard content wrapper, specific to non-login pages */
+    .dashboard-page-wrapper {
+        width: 95%; /* Make it wide */
+        max-width: 700px; /* Adjust max-width for forms */
+        margin: 20px auto; /* Center it with some top/bottom margin */
+        background-color: #fff; /* White background for the card */
+        padding: 30px; /* Ample padding inside the box */
+        border-radius: 8px; /* Rounded corners */
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2); /* Soft shadow */
+        box-sizing: border-box; /* Include padding in width */
+    }
+
+    /* Style for the form container within the wrapper */
+    .edit-form-container {
+        display: flex;
+        flex-direction: column;
+        gap: 15px; /* Space between form elements */
+        width: 100%;
+    }
+    .edit-form-container label {
+        width: 100%;
+        text-align: left;
+        margin-bottom: 0;
+    }
+    .edit-form-container input[type="text"],
+    .edit-form-container input[type="email"],
+    .edit-form-container input[type="date"],
+    .edit-form-container input[type="time"],
+    .edit-form-container textarea {
+        width: calc(100% - 22px); /* Inputs span full width minus padding */
+        padding: 12px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 1em;
+        box-sizing: border-box;
+    }
+    /* The submit button in this form will now use .btn-action-primary */
+    .edit-form-container input[type="submit"] {
+        width: auto;
+        margin-top: 20px;
+        align-self: center; /* Center the submit button */
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-page-wrapper {
+            width: 98%;
+            padding: 15px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="dashboard-page-wrapper">
+        <h1>Edit Client: {{ client.client_name }}</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flash-messages">
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <div class="edit-form-container">
+            <form method="POST" action="{{ url_for('edit_client', client_id=client.id) }}">
+                <label for="client_name">Client Name:</label>
+                <input type="text" id="client_name" name="client_name" value="{{ client.client_name }}" required>
+
+                <label for="mobile_number">Client Mobile Number (+91xxxxxxxxx):</label>
+                <input type="text" id="mobile_number" name="mobile_number" value="{{ client.mobile_number }}" pattern="^\+\d{10,15}$" title="Please enter a valid mobile number starting with '+' (e.g., +919876543210)" required>
+
+                <label for="email">Client Email Address:</label>
+                <input type="email" id="email" name="email" value="{{ client.email }}" required>
+
+                <label for="scheduled_date">Scheduled Visit Date:</label>
+                <input type="date" id="scheduled_date" name="scheduled_date" value="{{ client.scheduled_date }}" required>
+
+                <label for="scheduled_time">Scheduled Visit Time:</label>
+                <input type="time" id="scheduled_time" name="scheduled_time" value="{{ client.scheduled_time }}" required>
+
+                <label for="sales_representative">Sales Representative Assigned (Optional):</label>
+                <input type="text" id="sales_representative" name="sales_representative" value="{{ client.sales_representative if client.sales_representative else '' }}">
+
+                <label for="property_of_interest">Property of Interest (Optional):</label>
+                <input type="text" id="property_of_interest" name="property_of_interest" value="{{ client.property_of_interest if client.property_of_interest else '' }}">
+
+                <label for="additional_notes">Additional Notes (Optional):</label>
+                <textarea id="additional_notes" name="additional_notes" rows="3">{{ client.additional_notes if client.additional_notes else '' }}</textarea>
+                
+                <input type="submit" value="Update Client Details" class="btn-action-primary">
+            </form>
+            <p style="text-align: center; margin-top: 20px;">
+                <a href="{{ url_for('admin_dashboard') }}" class="button" style="background-color: #6c757d; color: white; padding: 10px 20px; text-decoration: none; border-radius: 8px;">Back to Admin Dashboard</a>
+            </p>
+        </div>
+    </div>
+{% endblock %}

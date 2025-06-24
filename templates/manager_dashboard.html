@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Manager Dashboard{% endblock %}
+
+{% block content %}
+    <div class="dashboard-page-wrapper">
+        <h1>Manager Dashboard {% if user_department %}({{ user_department }} Department){% endif %}</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flash-messages">
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <p>Welcome, Manager! This dashboard shows clients registered by sales representatives in your department.</p>
+        
+        <hr style="width: 100%; border: 0; border-top: 1px solid #eee; margin: 30px 0;"> 
+
+        <h2>Users in Your Department</h2>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Role</th>
+                        <th>Email</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users_in_department %}
+                        <tr>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.role | capitalize }}</td>
+                            <td>{{ user.email if user.email else 'N/A' }}</td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="3">No other users found in your department.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <hr style="width: 100%; border: 0; border-top: 1px solid #eee; margin: 30px 0;"> 
+
+        <h2>Clients Registered by Your Department's Sales Reps</h2>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Client Name</th>
+                        <th>Mobile</th>
+                        <th>Email</th>
+                        <th>Scheduled</th>
+                        <th>Code</th>
+                        <th>Status</th>
+                        <th>Registered By</th>
+                        <th>Verified At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for client in clients %}
+                        <tr>
+                            <td>{{ client.id }}</td>
+                            <td>{{ client.client_name }}</td>
+                            <td>{{ client.mobile_number }}</td>
+                            <td>{{ client.email }}</td>
+                            <td>{{ client.scheduled_date }} {{ client.scheduled_time }}</td>
+                            <td><strong>{{ client.unique_code }}</strong></td>
+                            <td>{{ 'Used' if client.is_code_used else 'Active' }}</td>
+                            <td>{{ client.sales_representative if client.sales_representative else 'N/A' }}</td>
+                            <td>{{ client.verified_at if client.verified_at else 'N/A' }}</td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="9">No client data found for your department's sales representatives.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <p style="text-align: center; margin-top: 20px;">
+            <a href="{{ url_for('logout') }}" class="button" style="background-color: #6c757d; color: white; padding: 10px 20px; text-decoration: none; border-radius: 8px;">Logout</a>
+        </p>
+    </div>
+{% endblock %}

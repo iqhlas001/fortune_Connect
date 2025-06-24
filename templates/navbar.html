@@ -1,0 +1,11 @@
+<div class="navbar">
+    <div>
+        <a href="/">Frotune Connect To</a>
+    </div>
+    <div>
+        {% if session.username %}
+            <span>Hello, {{ session.username }} ({{ session.role | capitalize }})</span>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        {% endif %}
+    </div>
+</div>

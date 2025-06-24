@@ -1,0 +1,6 @@
+    Flask==2.3.2
+    python-decouple==3.8
+    twilio==7.17.0
+    sendgrid==6.11.0
+    Flask-CORS==4.0.0 # Ensure this version or newer
+    

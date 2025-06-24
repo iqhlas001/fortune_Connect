@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fortune Connect To (React)</title>
+    <!-- In development, the React dev server serves the actual app.
+         In production, the built React files (including this index.html)
+         would be copied into Flask's static and templates directories. -->
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background-color: #f0f0f0; color: #333; }
+        .loading-container { text-align: center; }
+        .loading-spinner { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 15px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="loading-container">
+        <div class="loading-spinner"></div>
+        <p>Loading React App...</p>
+        <p>Please ensure your React development server is running on <a href="http://localhost:5173" target="_blank">http://localhost:5173</a>.</p>
+    </div>
+    <!-- The #root div is where your React app will mount -->
+    <div id="root" style="display:none;"></div> 
+    <!-- For local development, Vite injects the React app here -->
+    <script type="module" src="http://localhost:5173/@vite/client"></script>
+    <script type="module" src="http://localhost:5173/src/main.jsx"></script>
+</body>
+</html>

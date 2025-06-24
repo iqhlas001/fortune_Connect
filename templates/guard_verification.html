@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Guard Verification{% endblock %}
+
+{% block content %}
+    <div class="dashboard-page-wrapper"> {# Ensure this wrapper is present and styled in main.css #}
+        <h1>Security Gate - Client Verification</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flash-messages">
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <div class="verification-form-container">
+            <form method="POST" action="{{ url_for('verify_code') }}">
+                <label for="unique_code">Enter Unique Code:</label><br>
+                <input type="text" id="unique_code" name="unique_code" required autofocus>
+                <input type="submit" value="Verify Client Code">
+            </form>
+        </div>
+
+        {% if verification_result %}
+            <hr style="width: 100%; border: 0; border-top: 1px solid #eee; margin: 30px 0;">
+            <div class="verification-result-section">
+                {% if verification_result.status == 'success' %}
+                    <h2 class="success-message">VERIFICATION SUCCESSFUL!</h2>
+                    <p><strong>Client Name:</strong> {{ verification_result.client_name }}</p>
+                    <p><strong>Scheduled For:</strong> {{ verification_result.scheduled_date }} at {{ verification_result.scheduled_time }}</p>
+                    <p><strong>Sales Representative:</strong> {{ verification_result.sales_representative }}</p>
+                    {% if verification_result.property_of_interest %}
+                        <p><strong>Property of Interest:</strong> {{ verification_result.property_of_interest }}</p>
+                    {% endif %}
+                    
+                    <form method="POST" action="{{ url_for('admit_client_and_notify_manager') }}"> {# Updated action #}
+                        <input type="hidden" name="client_id" value="{{ verification_result.client_id }}">
+                        <input type="submit" value="NOTIFY MD & ADMIT CLIENT" style="background-color: #007bff;">
+                    </form>
+                {% else %}
+                    <h2 class="error-message">{{ verification_result.message }}</h2>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <hr style="width: 100%; border: 0; border-top: 1px solid #eee; margin: 30px 0;">
+
+        <h2>Recent Verification Attempts</h2>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Client Name</th>
+                        <th>Status</th>
+                        <th>Attempt Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log_entry in verification_logs %}
+                        <tr>
+                            <td>{{ log_entry.code if log_entry is mapping and 'code' in log_entry else 'N/A' }}</td>
+                            <td>{{ log_entry.client_name if log_entry is mapping and 'client_name' in log_entry else 'N/A' }}</td>
+                            <td style="color: {{ 'green' if log_entry is mapping and log_entry.get('status', '') == 'success' else 'red' }};">
+                                {{ log_entry.get('status', 'Unknown') | capitalize if log_entry is mapping else 'N/A' }}
+                            </td>
+                            <td>{{ log_entry.timestamp if log_entry is mapping and 'timestamp' in log_entry else 'N/A' }}</td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="4">No recent verification attempts.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

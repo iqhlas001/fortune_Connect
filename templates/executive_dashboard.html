@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Executive Dashboard{% endblock %}
+
+{% block content %}
+    <div class="dashboard-page-wrapper">
+        <h1>Executive Dashboard</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flash-messages">
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <p>Welcome, Executive! This dashboard provides a high-level overview of key client metrics and your own registrations.</p>
+        
+        <div style="display: flex; justify-content: space-around; margin-top: 30px; flex-wrap: wrap;">
+            <div style="background-color: #e0f7fa; padding: 20px; border-radius: 10px; text-align: center; margin: 10px; flex: 1; min-width: 200px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                <h3 style="color: #00796b; margin-top: 0; font-size: 1.2em;">Total Clients</h3>
+                <p style="font-size: 2.5em; font-weight: bold; color: #004d40;">{{ total_clients }}</p>
+            </div>
+            <div style="background-color: #e8f5e9; padding: 20px; border-radius: 10px; text-align: center; margin: 10px; flex: 1; min-width: 200px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                <h3 style="color: #388e3c; margin-top: 0; font-size: 1.2em;">Verified Clients</h3>
+                <p style="font-size: 2.5em; font-weight: bold; color: #1b5e20;">{{ verified_clients }}</p>
+            </div>
+            <div style="background-color: #ffe0b2; padding: 20px; border-radius: 10px; text-align: center; margin: 10px; flex: 1; min-width: 200px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                <h3 style="color: #f57f17; margin-top: 0; font-size: 1.2em;">Unverified Clients</h3>
+                <p style="font-size: 2.5em; font-weight: bold; color: #e65100;">{{ unverified_clients }}</p>
+            </div>
+            <div style="background-color: #e6e6fa; padding: 20px; border-radius: 10px; text-align: center; margin: 10px; flex: 1; min-width: 200px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                <h3 style="color: #4F0A8D; margin-top: 0; font-size: 1.2em;">My Registered Clients</h3>
+                <p style="font-size: 2.5em; font-weight: bold; color: #7C10DD;">{{ my_registered_clients }}</p>
+            </div>
+        </div>
+
+        <p style="text-align: center; margin-top: 20px;">
+            <a href="{{ url_for('logout') }}" class="button" style="background-color: #6c757d; color: white; padding: 10px 20px; text-decoration: none; border-radius: 8px;">Logout</a>
+        </p>
+    </div>
+{% endblock %}
